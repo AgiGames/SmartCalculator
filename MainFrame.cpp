@@ -357,7 +357,8 @@ enum IDs {
 	LnButtonId = 30,
 	ExponentButtonId = 31,
 	InputTextId = 32,
-	DegButtonId = 33
+	DegButtonId = 33,
+	DecimalButtonId = 34
 };
 
 wxFont font(20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Digital7");
@@ -557,6 +558,11 @@ void MainFrame::AddControls() {
 	DegButton->SetForegroundColour(wxColour(102, 178, 255));
 	DegButton->SetFont(font);
 
+	DecimalButton = new wxButton(ControlsPanel5, DecimalButtonId, ".", wxDefaultPosition, wxDefaultSize);
+	DecimalButton->SetBackgroundColour(wxColour(64, 64, 64));
+	DecimalButton->SetForegroundColour(wxColour(102, 178, 255));
+	DecimalButton->SetFont(font);
+
 	ControlsSizer6->Add(SinButton, 1, wxEXPAND);
 	ControlsSizer6->Add(CosButton, 1, wxEXPAND);
 	ControlsSizer6->Add(TanButton, 1, wxEXPAND);
@@ -568,6 +574,7 @@ void MainFrame::AddControls() {
 	ControlsSizer6->Add(LnButton, 1, wxEXPAND);
 	ControlsSizer5->Add(EqualButton, 1, wxEXPAND);
 	ControlsSizer5->Add(ExponentButton, 1, wxEXPAND);
+	ControlsSizer5->Add(DecimalButton, 1, wxEXPAND);
 	ControlsSizer5->Add(ClearButton, 1, wxEXPAND);
 	ControlsSizer4->Add(MultiplyButton, 1, wxEXPAND);
 	ControlsSizer4->Add(DivideButton, 1, wxEXPAND);
@@ -630,6 +637,7 @@ void MainFrame::BindControls() {
 	EqualButton->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
 	InputOutputTextCtrl->Bind(wxEVT_TEXT, &MainFrame::OnType, this);
 	DegButton->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
+	DecimalButton->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
 }
 
 void MainFrame::OnButtonClicked(wxCommandEvent& event) {
@@ -720,6 +728,9 @@ void MainFrame::OnButtonClicked(wxCommandEvent& event) {
 	case DegButtonId:
 		InputOutputTextCtrl->AppendText("deg(");
 		break;
+	case DecimalButtonId:
+		InputOutputTextCtrl->AppendText(".");
+		break;
 	}
 }
 
@@ -734,11 +745,18 @@ void MainFrame::CalculateAndShowOutput() {
 	MathematicalExpression InputExpression;
 	InputExpression.GetInputExpression(WXInput);
 	InputExpression.FormatInputExpression();
-	std::string answer;
+	float answer;
 	try {
-		answer = std::to_string(InputExpression.evaluate());
-		wxString WXOutput(answer);
-		InputOutputTextCtrl->SetValue(WXOutput);
+		answer = InputExpression.evaluate();
+		int IntCast = static_cast<int>(std::round(answer));
+		if (IntCast / answer == 1) {
+			wxString WXOutput(std::to_string(IntCast));
+			InputOutputTextCtrl->SetValue(WXOutput);
+		}
+		else {
+			wxString WXOutput(std::to_string(answer));
+			InputOutputTextCtrl->SetValue(WXOutput);
+		}
 	}
 	catch (std::invalid_argument& e) {
 		InputOutputTextCtrl->SetValue("INVALID SYNTAX");

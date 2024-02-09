@@ -49,6 +49,7 @@ class MainFrame : public wxFrame
 	wxButton* LogButton;
     wxButton* LnButton;
 	wxButton* ExponentButton;
+	wxButton* DecimalButton;
 
 	bool EqualPressed = false;
 public:
